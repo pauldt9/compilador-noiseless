@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Clase principal del intérprete
 public class NoiselessInterpreter {
@@ -51,6 +53,16 @@ public class NoiselessInterpreter {
         // Recorre cada línea
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
+
+            // Detecta si la linea está vacía
+            if(line.isEmpty()) continue;
+
+            // Separación de tokens
+            List<String> tokens = tokenize(line);
+
+            System.out.println("Línea: " + line);
+            System.out.println("Tokens: " + tokens);
+            System.out.println("\n");
 
             // Detecta tipo de instrucción
             if (line.startsWith("set")) {
@@ -281,5 +293,28 @@ public class NoiselessInterpreter {
         }
 
         return Integer.parseInt(val);
+    }
+
+    private List<String> tokenize(String line) {
+        // Lista para guardar los tokens encontrados
+        List<String> tokens = new ArrayList<>();
+
+        // Expresión regular que define qué es un token
+        // "\"[^\"]*\""     = cadenas de texto entre comillas
+        // \\w+             = palabras (variables, keywords)
+        // == <= >=         = operadores dobles
+        // [()+\-*/%=,<>]   = símbolos individuales
+        String regex = "\"[^\"]*\"|\\w+|==|<=|>=|[()+\\-*/%=,<>]";
+
+        // Matcher para buscar coincidencias en la línea
+        Matcher matcher = Pattern.compile(regex).matcher(line);
+
+        // Recorre cada coincidencia encontrada
+        while (matcher.find()) {
+            // Y siendo que cada coincidencia es un token, lo añade a la lista
+            tokens.add(matcher.group());
+        }
+
+        return tokens;
     }
 }
