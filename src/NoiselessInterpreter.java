@@ -8,6 +8,12 @@ public class NoiselessInterpreter {
     // Aquí se guardan todas las variables del programa
     private final Map<String, Object> variables = new HashMap<>();
 
+    // Map para guardar los tokens por linea
+    private final Map<Integer, List<String>> tokensForLine = new LinkedHashMap<>();
+
+    // Contador para numero de linea
+    private int globalLineNumber = 1;
+
     public static void main(String[] args) {
 
         // Se crea una instancia del intérprete
@@ -38,10 +44,21 @@ public class NoiselessInterpreter {
         if (a > b)
             print(a + " es mayor que " + b)
         end
+
+        print(a + " cuarenta")
+        print(a + cuarenta)
+        set int m = 10
+        set int m 10
+        set int r = add(m, 10)
+        set int r = add m 10
         """;
 
         // Ejecuta el código
         interpreter.run(code);
+
+        // Imprime los tokens por cada linea (no vacía) del script
+        System.out.println("=== TOKENS DEL PROGRAMA ===");
+        interpreter.printTokensForLine();
     }
 
     // Metodo main que ejecuta el código
@@ -54,56 +71,57 @@ public class NoiselessInterpreter {
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
 
-            // Detecta si la linea está vacía
-            if(line.isEmpty()) continue;
+            // Guarda la linea actual antes de saltar
+            int currentLineNumber = globalLineNumber;
 
-            // Separación de tokens
-            List<String> tokens = tokenize(line);
+            try {
+                // Detecta si la linea está vacía
+                if (line.isEmpty()) continue;
 
-            System.out.println("Línea: " + line);
-            System.out.println("Tokens: " + tokens);
-            System.out.println("\n");
+                // Separación de tokens
+                List<String> tokens = tokenize(line);
 
-            // Detecta tipo de instrucción
-            if (line.startsWith("set")) {
-                handleSet(line);
-            }
+                // Almacena los tokens en la linea correspondiente y suma al contador
+                tokensForLine.put(currentLineNumber, tokens);
+                globalLineNumber++;
 
-            else if (line.startsWith("print")) {
-                handlePrint(line);
-            }
+                // Detecta tipo de instrucción
+                if (line.startsWith("set")) {
+                    handleSet(line);
+                } else if (line.startsWith("print")) {
+                    handlePrint(line);
+                } else if (line.startsWith("if")) {
+                    String condition = extractCondition(line);
 
-            else if (line.startsWith("if")) {
-                String condition = extractCondition(line);
-
-                // Si la condición es falsa, salta hasta "end"
-                if (!evaluateCondition(condition)) {
-                    while (!lines[i].trim().equals("end")) {
-                        i++;
+                    // Si la condición es falsa, salta hasta "end"
+                    if (!evaluateCondition(condition)) {
+                        while (!lines[i].trim().equals("end")) {
+                            i++;
+                        }
                     }
+                } else if (line.startsWith("while")) {
+                    String condition = extractCondition(line);
+
+                    int start = i + 1;
+                    List<String> block = new ArrayList<>();
+
+                    int j = start;
+
+                    // Guarda el bloque dentro del while
+                    while (!lines[j].trim().equals("end")) {
+                        block.add(lines[j]);
+                        j++;
+                    }
+
+                    // Ejecuta el bloque mientras la condición sea verdadera
+                    while (evaluateCondition(condition)) {
+                        run(String.join("\n", block));
+                    }
+
+                    i = j;
                 }
-            }
-
-            else if (line.startsWith("while")) {
-                String condition = extractCondition(line);
-
-                int start = i + 1;
-                List<String> block = new ArrayList<>();
-
-                int j = start;
-
-                // Guarda el bloque dentro del while
-                while (!lines[j].trim().equals("end")) {
-                    block.add(lines[j]);
-                    j++;
-                }
-
-                // Ejecuta el bloque mientras la condición sea verdadera
-                while (evaluateCondition(condition)) {
-                    run(String.join("\n", block));
-                }
-
-                i = j;
+            }catch (Exception e) {
+                System.out.println("Error en línea " + currentLineNumber + ": " + e.getMessage());
             }
         }
     }
@@ -115,7 +133,7 @@ public class NoiselessInterpreter {
         String[] parts = line.split("=");
 
         if (parts.length < 2) {
-            throw new RuntimeException("Error en set: " + line);
+            throw new NoiselessException("Falta '=' en instrucción set: " + line);
         }
 
         String left = parts[0].trim();
@@ -134,7 +152,7 @@ public class NoiselessInterpreter {
             varName = leftParts[1];
         }
         else {
-            throw new RuntimeException("Sintaxis inválida en set: " + line);
+            throw new NoiselessException("Sintaxis inválida en set: " + line);
         }
 
         // Si es texto
@@ -158,7 +176,7 @@ public class NoiselessInterpreter {
         int end = line.lastIndexOf(")");
 
         if (start == -1 || end == -1 || end <= start) {
-            throw new RuntimeException("Error en print: " + line);
+            throw new NoiselessException("Sintaxis inválida en print: " + line);
         }
 
         String content = line.substring(start + 1, end).trim();
@@ -231,12 +249,22 @@ public class NoiselessInterpreter {
         int a = Integer.parseInt(getValue(parts[0].trim()).toString());
         int b = Integer.parseInt(getValue(parts[1].trim()).toString());
 
+        if (parts.length != 2){
+            throw new NoiselessException("Operacion invalida" + expr);
+        }
+
         return switch (op) {
             case "+" -> a + b;
             case "-" -> a - b;
             case "*" -> a * b;
-            case "/" -> a / b;
-            case "%" -> a % b;
+            case "/" -> {
+                if (b==0) throw new NoiselessException("División entre cero");
+                yield a / b;
+            }
+            case "%" -> {
+                if (b == 0) throw new NoiselessException("Módulo entre cero");
+                yield a % b;
+            }
             case "^" -> (int) Math.pow(a, b);
             default -> 0;
         };
@@ -247,7 +275,12 @@ public class NoiselessInterpreter {
         if (variables.containsKey(token)) {
             return variables.get(token);
         }
-        return Integer.parseInt(token);
+
+        try{
+            return Integer.parseInt(token);
+        }catch (NumberFormatException e) {
+            throw new NoiselessException("Variable o valor invalido: " + token);
+        }
     }
 
     // Extraer condicion de if/while
@@ -281,7 +314,7 @@ public class NoiselessInterpreter {
             return getInt(parts[0]) < getInt(parts[1]);
         }
 
-        throw new RuntimeException("Condición inválida");
+        throw new NoiselessException("Condición inválida: " + cond);
     }
 
     // Convierte a entero
@@ -314,7 +347,14 @@ public class NoiselessInterpreter {
             // Y siendo que cada coincidencia es un token, lo añade a la lista
             tokens.add(matcher.group());
         }
-
         return tokens;
+    }
+
+    public void printTokensForLine() {
+        // Recorre cada entrada clave-valor del map
+        for (Map.Entry<Integer, List<String>> entry : tokensForLine.entrySet()) {
+            // Imprime cada linea junto a sus tokens correspondientes
+            System.out.println("Línea " + entry.getKey() + ": " + entry.getValue());
+        }
     }
 }
