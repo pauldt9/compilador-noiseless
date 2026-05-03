@@ -158,7 +158,15 @@ public class NoiselessInterpreter {
         int end = line.lastIndexOf(")");
 
         if (start == -1 || end == -1 || end <= start) {
-            throw new RuntimeException("Error en print: " + line);
+            throw new RuntimeException(
+                    "Error en instrucción print\n\n" +
+                            "Línea: " + line + "\n\n" +
+                            "Qué pasó:\n" +
+                            "La instrucción print está mal formada. Faltan paréntesis o están mal ubicados.\n\n" +
+                            "Solución:\n" +
+                            "Usa la sintaxis correcta de print con paréntesis.\n" +
+                            "Ejemplo: print(\"Hola mundo\")\n"
+            );
         }
 
         String content = line.substring(start + 1, end).trim();
@@ -185,7 +193,21 @@ public class NoiselessInterpreter {
             }
             // Expresión matemática
             else {
-                result.append(evaluateExpression(part));
+                if (part.matches("\\d+")){
+                    result.append(evaluateExpression(part));
+                } else {
+                    throw new RuntimeException(
+                            "Error en instrucción print\n" +
+                                    "Línea: " + line +
+                                    "\nQué pasó:\n" +
+                                    "La variable \"" + part + "\" no ha sido definida." +
+                                    "\nSolución:\n" +
+                                    "Declara la variable antes de utilizarla." +
+                                    "\nEjemplo:\n" +
+                                    "set int x = 10 \n" +
+                                    "print(x)"
+                    );
+                }
             }
         }
 
@@ -219,7 +241,19 @@ public class NoiselessInterpreter {
         if (expr.startsWith("mod")) return operate(expr, "%");
         if (expr.startsWith("power")) return operate(expr, "^");
 
-        return Integer.parseInt(expr);
+        try {
+            return Integer.parseInt(expr);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(
+                    "\nError de valor numérico inválido\n" +
+                            "Expresión: " + expr + "\n\n" +
+                            "Qué pasó:\n" +
+                            "Se esperaba un número, pero se recibió un valor no numérico.\n\n" +
+                            "Solución:\n" +
+                            "Usa un número válido o una variable que contenga un número.\n" +
+                            "Ejemplo: set int a = 10\n"
+            );
+        }
     }
 
     // Realiza operaciones
