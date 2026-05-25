@@ -24,100 +24,104 @@ public class NoiselessInterpreter {
     // Contador para numero de linea
     private int globalLineNumber = 1;
 
+    // ===== COLORES ANSI =====
     public static final String RESET = "\u001B[0m";
+
+    // Colores básicos
     public static final String RED = "\u001B[31m";
     public static final String GREEN = "\u001B[32m";
     public static final String YELLOW = "\u001B[33m";
+    public static final String BLUE = "\u001B[34m";
+    public static final String PURPLE = "\u001B[35m";
     public static final String CYAN = "\u001B[36m";
+    public static final String WHITE = "\u001B[37m";
+
+    // Negritas
+    public static final String BOLD = "\u001B[1m";
 
     public static void main(String[] args) {
 
         // Instancia del intérprete
         NoiselessInterpreter interpreter = new NoiselessInterpreter();
 
-        System.out.println(CYAN + "Guía del lenguaje Noiseless" + RESET);
+        System.out.println(BOLD + CYAN +
+                "=====================================");
+        System.out.println("     GUÍA DEL LENGUAJE NOISELESS");
+        System.out.println("=====================================" + RESET);
 
-        System.out.println(YELLOW + "TIPOS DE DATOS" + RESET);
-
+        System.out.println(BOLD + BLUE + "\nTIPOS DE DATOS" + RESET);
         System.out.println("""
-            int  -> números enteros
-            texto   -> cadenas de texto
-            """);
+        int     -> números enteros
+        texto   -> cadenas de texto
+        """);
 
-        System.out.println(YELLOW + "DECLARACIÓN DE VARIABLES" + RESET);
-
+        System.out.println(BOLD + BLUE + "DECLARACIÓN DE VARIABLES" + RESET);
         System.out.println("""
-                definir int edad = 20
-                definir texto nombre = Juan
-                """);
+        definir int edad = 20
+        definir texto nombre = "Juan"
+        """);
 
-        System.out.println(YELLOW + "IMPRIMIR EN CONSOLA" + RESET);
-
+        System.out.println(BOLD + BLUE + "IMPRIMIR EN CONSOLA" + RESET);
         System.out.println("""
-            imprimir("Hola mundo")
-            imprimir(nombre)
-            imprimir("Edad: " + edad)
-            """);
+        imprimir("Hola mundo")
+        imprimir(nombre)
+        imprimir("Edad: " + edad)
+        """);
 
-        System.out.println(YELLOW + "OPERACIONES MATEMÁTICAS" + RESET);
-
+        System.out.println(BOLD + BLUE + "OPERACIONES MATEMÁTICAS" + RESET);
         System.out.println("""
-            sumar(a,b)
-            restar(a,b)
-            multiplicar(a,b)
-            dividir(a,b)
-            modulo(a,b)
-            potencia(a,b)
-            """);
+        sumar(a,b)
+        restar(a,b)
+        multiplicar(a,b)
+        dividir(a,b)
+        modulo(a,b)
+        potencia(a,b)
+        """);
 
-        System.out.println(YELLOW + "EJEMPLOS" + RESET);
-
+        System.out.println(BOLD + BLUE + "EJEMPLOS" + RESET);
         System.out.println("""
-            definir int a = 10
-            definir int b = 5
-            
-            definir int c = sumar(a,b)
-            
-            imprimir(c)
-            """);
+        definir int a = 10
+        definir int b = 5
 
-        System.out.println(YELLOW + "CONCATENACIÓN" + RESET);
+        definir int c = sumar(a,b)
 
-        System.out.println("concatenar(" + "Hola" + "," + " Mundo)\n");
+        imprimir(c)
+        """);
 
-        System.out.println(YELLOW + "CONDICIONALES" + RESET);
-
+        System.out.println(BOLD + BLUE + "CONCATENACIÓN" + RESET);
         System.out.println("""
-            si (a > b)
-                imprimir("a es mayor")
-            fin
-            """);
+        concatenar("Hola", "Mundo")
+        """);
 
-        System.out.println(YELLOW + "CICLOS" + RESET);
-
+        System.out.println(BOLD + BLUE + "CONDICIONALES" + RESET);
         System.out.println("""
-            mientras (a < 10)
-                imprimir(a)
-            fin
-            """);
+        si (a > b)
+            imprimir("a es mayor")
+        fin
+        """);
 
-        System.out.println(YELLOW + "OPERADORES LÓGICOS" + RESET);
-
+        System.out.println(BOLD + BLUE + "CICLOS" + RESET);
         System.out.println("""
-            >
-            <
-            >=
-            <=
-            ==
-            """);
+        mientras (a < 10)
+            imprimir(a)
+        fin
+        """);
 
-        System.out.println(YELLOW + "COMANDOS DEL INTÉRPRETE" + RESET);
-
+        System.out.println(BOLD + BLUE + "OPERADORES LÓGICOS" + RESET);
         System.out.println("""
-            tokens      -> mostrar tokens de una línea
-            variables   -> mostrar variables almacenadas
-            salir       -> cerrar intérprete
-            """);
+        >
+        <
+        >=
+        <=
+        ==
+        """);
+
+        System.out.println(BOLD + BLUE + "COMANDOS DEL INTÉRPRETE" + RESET);
+        System.out.println("""
+        tokens      -> mostrar tokens de una línea
+        variables   -> mostrar variables almacenadas
+        salir       -> cerrar intérprete
+        """);
 
         Scanner scanner = new Scanner(System.in);
 
@@ -142,7 +146,7 @@ public class NoiselessInterpreter {
 
             // SALIR
             if (input.equalsIgnoreCase("salir")) {
-                System.out.println(RED + "Cerrando Noiseless..." + RESET);
+                System.out.println(PURPLE + BOLD + "Cerrando Noiseless..." + RESET);
                 break;
             }
 
@@ -165,7 +169,7 @@ public class NoiselessInterpreter {
             // INICIO DE BLOQUE
             else if (
                     input.trim().startsWith("mientras") ||
-                    input.trim().startsWith("si")
+                            input.trim().startsWith("si")
             ) {
                 StringBuilder newBlock = new StringBuilder();
                 newBlock.append(input).append("\n");
@@ -174,7 +178,12 @@ public class NoiselessInterpreter {
             // FIN DE BLOQUE
             // Cuando encontramos "fin" y la pila no está vacía, extraemos el bloque completo y lo ejecutamos
             else if (input.trim().equals("fin") && !blockStack.isEmpty()) {
+
+                // agregar el fin al bloque
+                blockStack.peek().append("fin\n");
+
                 StringBuilder completed = blockStack.pop();
+
                 interpreter.run(completed.toString());
             // Si estamos dentro de un bloque pero no es "fin", se añade la línea al bloque actual
             } else if (!blockStack.isEmpty()) {
@@ -219,16 +228,16 @@ public class NoiselessInterpreter {
                 // Detecta tipo de instrucción
                 if (
                         line.startsWith("sumar") ||
-                        line.startsWith("restar") ||
-                        line.startsWith("multiplicar") ||
-                        line.startsWith("dividir") ||
-                        line.startsWith("modulo") ||
-                        line.startsWith("potencia")
+                                line.startsWith("restar") ||
+                                line.startsWith("multiplicar") ||
+                                line.startsWith("dividir") ||
+                                line.startsWith("modulo") ||
+                                line.startsWith("potencia")
                 ) {
 
                     int result = evaluateExpression(line);
 
-                    System.out.println(GREEN + result + RESET);
+                    System.out.println(result);
                 }else if (line.startsWith("definir")) {
                     handleSet(line);
                 } else if (line.contains("=") && !line.startsWith("definir")){
@@ -275,15 +284,13 @@ public class NoiselessInterpreter {
                         // Si hubo error, romper ciclo
                         if (!success) {
                             System.out.println(
-                                    RED +
-                                            "Ejecución del ciclo detenida por error." +
-                                            RESET
+                                    "Ejecución del ciclo detenida por error."
                             );
                             break;
                         }
                     }
 
-                    if (j > lines.length) {
+                    if (j >= lines.length) {
                         throw new NoiselessException(
                                 "Bloque 'mientras' sin cerrar con 'fin'"
                         );
@@ -293,16 +300,16 @@ public class NoiselessInterpreter {
                 } else {
                     throw new NoiselessException(
                             "Instrucción desconocida:\n" +
-                            line +
-                            "\n\nComando no reconocido"
+                                    line +
+                                    "\n\nComando no reconocido"
                     );
                 }
             }catch (Exception e) {
                 System.out.println(
-                        RED +
-                                "\n[ERROR EN LÍNEA " +
-                                currentLineNumber +
-                                "]\n" +
+                        RED + BOLD +
+                                "\n====================================\n" +
+                                "[ERROR EN LÍNEA " + currentLineNumber + "]\n" +
+                                "====================================\n" +
                                 e.getMessage() +
                                 RESET
                 );
@@ -363,6 +370,14 @@ public class NoiselessInterpreter {
         }
 
         variables.put(varName, new Variable(varType, value));
+        System.out.println(
+                GREEN +
+                        "✔ Variable creada: " +
+                        YELLOW + varName +
+                        GREEN + " = " +
+                        WHITE + value +
+                        RESET
+        );
     }
 
     private void handleAssignment(String line) {
@@ -389,6 +404,14 @@ public class NoiselessInterpreter {
         }
 
         var.value = newValue;
+        System.out.println(
+                CYAN +
+                        "✔ Variable actualizada: " +
+                        YELLOW + varName +
+                        CYAN + " = " +
+                        WHITE + newValue +
+                        RESET
+        );
     }
 
     // Maneja imprimir con concatenación (+)
@@ -399,7 +422,12 @@ public class NoiselessInterpreter {
         for (String part : parts) {
             result.append(evaluateTextExpression(part.trim()));
         }
-        System.out.println(GREEN + result + RESET);
+        System.out.println(
+                GREEN +
+                        "Resultado: " +
+                        WHITE + result +
+                        RESET
+        );
     }
 
     // Concatena dos valores
@@ -629,35 +657,70 @@ public class NoiselessInterpreter {
 
     public void printTokensOfLine(int lineNumber) {
 
-        // Verifica si la línea existe
         if (tokensForLine.containsKey(lineNumber)) {
 
             System.out.println(
-                    "Tokens de la línea " +
+                    CYAN + BOLD +
+                            "\nTOKENS DE LA LÍNEA " +
                             lineNumber +
-                            ": " +
-                            tokensForLine.get(lineNumber)
+                            RESET
+            );
+
+            System.out.println(
+                    YELLOW +
+                            tokensForLine.get(lineNumber) +
+                            RESET
             );
 
         } else {
 
             System.out.println(
-                    "No existen tokens para la línea " +
-                            lineNumber
+                    RED +
+                            "No existen tokens para la línea " +
+                            lineNumber +
+                            RESET
             );
         }
     }
 
     public void showVariables() {
+
         if (variables.isEmpty()) {
-            System.out.println(YELLOW + "No hay variables." + RESET);
+
+            System.out.println(
+                    RED +
+                            "No hay variables almacenadas." +
+                            RESET
+            );
+
             return;
         }
-        System.out.println(CYAN + "\n=== VARIABLES ===" + RESET);
+
+        System.out.println(
+                BOLD + CYAN +
+                        "\n========== VARIABLES ==========" +
+                        RESET
+        );
+
         for (Map.Entry<String, Variable> entry : variables.entrySet()) {
-            System.out.println(entry.getKey() + " (" + entry.getValue().type + ") = " + entry.getValue().value);
+
+            System.out.println(
+                    YELLOW + entry.getKey() +
+                            RESET +
+                            " (" +
+                            PURPLE + entry.getValue().type +
+                            RESET +
+                            ") = " +
+                            GREEN + entry.getValue().value +
+                            RESET
+            );
         }
-        System.out.println();
+
+        System.out.println(
+                BOLD + CYAN +
+                        "================================\n" +
+                        RESET
+        );
     }
     // Variable de Noiseless, guarda el tipo ("int" o "texto") y el valor (Integer o String)
     private static class Variable {
@@ -685,10 +748,13 @@ public class NoiselessInterpreter {
         // Variable
         if (variables.containsKey(expr)) {
             Variable var = variables.get(expr);
-            if (!var.type.equals("texto")) {
-                throw new NoiselessException("No se puede asignar una variable de tipo " + var.type + " a una variable de tipo texto");
+            if (var.type.equals("int")) {
+                return var.value.toString();   // convierte el número a texto
+            } else if (var.type.equals("texto")) {
+                return (String) var.value;
+            } else {
+                throw new NoiselessException("Tipo no soportado para impresión: " + var.type);
             }
-            return (String) var.value;
         }
 
         // Si es número sin comillas, da error
